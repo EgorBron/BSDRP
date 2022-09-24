@@ -1,0 +1,15 @@
+﻿{
+  "$schema": "https://raw.githubusercontent.com/bsmg/BSIPA-MetadataFileSchema/master/Schema.json",
+  "id": "BSDRP",
+  "name": "Discord Rich Presence for Beat Saber",
+  "author": "EgorBron",
+  "version": "0.0.1",
+  "description": "Discord Rich Presence for Beat Saber (it is really rich!)",
+  "gameVersion": "1.23.0",
+  "dependsOn": {
+    "BSIPA": "^4.2.2",
+    "BeatSaberMarkupLanguage": "^1.6.3",
+    "SocketSaber":  "^0.0.1"
+  },
+  "files": ["Libs/discord_game_sdk.dll"]
+}
