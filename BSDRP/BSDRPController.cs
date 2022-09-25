@@ -50,7 +50,7 @@ namespace BSDRP {
         /// Called every frame after every other enabled script's Update().
         /// </summary>
         private void LateUpdate() {
-            Plugin.Discord.RunCallbacks();
+            Plugin.DiscordO.RunCallbacks();
         }
 
         /// <summary>
