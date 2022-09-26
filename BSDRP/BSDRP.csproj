@@ -487,6 +487,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DRPUtils.cs" />
     <Compile Include="DSDK\ActivityManager.cs" />
     <Compile Include="DSDK\Constants.cs" />
     <Compile Include="DSDK\Core.cs" />

@@ -24,25 +24,10 @@ namespace BSDRP {
         internal static Plugin Instance { get; private set; }
         internal static IPALogger Log { get; private set; }
         internal static Discord.Discord DiscordO { get; private set; }
-        private long launched;
-        DateTime origin = new DateTime(1970, 1, 1, 0, 0, 0, 0);
+        internal static long launched;
+        internal static DateTime origin = new DateTime(1970, 1, 1, 0, 0, 0, 0);
 
-        internal string GetStandardCover(string levelid) {
-            return "";
-        }
-
-        internal void MenuDRP() {
-            DiscordO.GetActivityManager().UpdateActivity(new Activity {
-                Timestamps = new ActivityTimestamps {
-                    Start = launched,
-                    End = 0L
-                },
-                Assets = new ActivityAssets {
-                    LargeImage = "mapselect_md"
-                },
-                Details = "In menu"
-            }, (a) => { });
-        }
+        
 
         [Init]
         public void Init(IPALogger logger, Config conf) {
@@ -59,59 +44,18 @@ namespace BSDRP {
             if (DiscordO == null) { Log.Critical("Discord isn't initialized!"); return; }
 
             var activitymgr = DiscordO.GetActivityManager();
-            SockSEventation.SongStartEvent += (eventa) => {
-                if (PluginConfig.Instance.DRPEnabled) {
-                    var now = (long)(DateTime.UtcNow - origin).TotalSeconds;
-                    var subname = eventa.songSubName;
-                    string difficulty = eventa.mapDifficulty.ToString().Replace("Plus", "+");
-                    var mode = eventa.mode
-                    .Replace("OneSaber", "One Saber")
-                    .Replace("NoArrows", "No Arrows")
-                    .Replace("90Degree", "90 Degree")
-                    .Replace("360Degree", "360 Degree") + (eventa.gameplayModifiers.zenMode ? " Zen" : "");
-
-                    var state = $"Playing on {difficulty} in {mode} mode on {((!eventa.mapGameLevelID.StartsWith("custom_level_")) ? "offical map." : "map by " + eventa.mapAuthor + ".")}";
-
-                    if (subname != "") {
-                        if (!subname.StartsWith(" (")) {
-                            if (!subname.StartsWith("(")) subname = "(" + eventa.songSubName;
-                            subname = " " + subname;
-                        }
-                        if (!subname.EndsWith(")")) {
-                            subname += ")";
-                        }
-                    }
-                    var details = $"{((eventa.songAuthorName == "") ? "" : (eventa.songAuthorName + " - "))}{eventa.songName} {subname}";
-
-                    activitymgr.UpdateActivity(new Activity {
-                        Assets = new ActivityAssets {
-                            LargeImage = eventa.mapBeatSaverCoverLink??GetStandardCover(eventa.mapGameLevelID),
-                            LargeText = $"{eventa.songName} - {difficulty} ({mode})",
-                            SmallImage = "beat_saber_logo",
-                            SmallText = $"With BSDRP and love"
-                        },
-                        Timestamps = new ActivityTimestamps {
-                            Start = now,
-                            End = (long)(now + eventa.duration)
-                        },
-                        Details = details,
-                        State = state,
-                        ApplicationId = 956250915378192454,
-                        Type = ActivityType.Playing
-                    }, (a) => { if (a == Result.Ok) Log.Notice($"Updated DRP: SongStart --- {details}"); });
-                }
-            };
+            SockSEventation.SongStartEvent += DRPUtils.SongStartDRP;
             SockSEventation.SongEndEvent += (_) => {
-                MenuDRP();
+                DRPUtils.MenuDRP();
             };
-            BSEvents.menuSceneLoaded += MenuDRP;
+            BSEvents.menuSceneLoaded += DRPUtils.MenuDRP;
         }
 
         [OnStart]
         public void OnApplicationStart() {
             new GameObject("BSDRPController").AddComponent<BSDRPController>();
             launched = (long)(DateTime.UtcNow - origin).TotalSeconds;
-            MenuDRP();
+            DRPUtils.MenuDRP();
         }
 
         [OnExit]
