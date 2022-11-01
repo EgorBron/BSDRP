@@ -16,7 +16,7 @@ using BS_Utils.Utilities;
 using Config = IPA.Config.Config;
 using BSDRP.Configuration;
 using IPA.Config.Data;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.ListView;
+using BSDRP.Utils;
 
 namespace BSDRP {
     [Plugin(RuntimeOptions.SingleStartInit)]
@@ -49,6 +49,11 @@ namespace BSDRP {
                 DRPUtils.MenuDRP();
             };
             BSEvents.menuSceneLoaded += DRPUtils.MenuDRP;
+            // that isn't work in any case
+            //SockSEventation.SongPauseEvent += DRPUtils.PauseDRP;
+            //SockSEventation.SongResumeEvent += DRPUtils.ResumeDRP;
+            //BSEvents.songPaused += DRPUtils.PauseDRP;
+            //BSEvents.songUnpaused += DRPUtils.ResumeDRP;
         }
 
         [OnStart]
