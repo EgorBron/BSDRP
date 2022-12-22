@@ -6,8 +6,6 @@ using System.Threading.Tasks;
 using BSDRP.Configuration;
 using Discord;
 using SocketSaber.EventModels;
-using static StandardLevelGameplayManager;
-using static UnityEngine.UI.Image;
 
 namespace BSDRP.Utils {
     internal class DRPUtils {
@@ -71,32 +69,37 @@ namespace BSDRP.Utils {
                     { "songBPM", eventa.songBPM.ToString() },
                 };
 
-                var state = "Playing on {difficulty} in {mode} mode on {phraseMapBy}.".Format(placeholders);
-                var details = "{phraseSongAuthor}{songName} {subname}".Format(placeholders);
+                var state = PluginConfig.Instance.State.Format(placeholders);
+                var details = PluginConfig.Instance.Details.Format(placeholders);
 
-                if (time == null) {
-                    if (timestampsLatest.Equals(default(ActivityTimestamps)))
-                    timestampsLatest = new ActivityTimestamps {
-                        Start = now,
-                        End = (long)(now + eventa.duration)
-                    };
-                } else if (!time.Value.Equals(default(ActivityTimestamps))) {
-                    timestampsLatest = time.Value;
+                if (PluginConfig.Instance.TimestampMode != TimestampMode.Disabled && PluginConfig.Instance.TimestampMode != TimestampMode.Static) {
+                    if (time == null) {
+                        if (timestampsLatest.Equals(default(ActivityTimestamps)))
+                            timestampsLatest = new ActivityTimestamps {
+                                Start = now,
+                                End = (long)(now + eventa.duration)
+                            };
+                    } else if (!time.Value.Equals(default(ActivityTimestamps))) {
+                        timestampsLatest = time.Value;
+                    }
                 }
-
-                Plugin.DiscordO.GetActivityManager().UpdateActivity(new Activity {
+                var act = new Activity {
                     Assets = new ActivityAssets {
                         LargeImage = eventa.mapBeatSaverCoverLink ?? GetStandardCover(eventa.mapGameLevelID),
-                        LargeText = $"{eventa.songName} - {difficulty}",
+                        LargeText = PluginConfig.Instance.LargeImageText.Format(placeholders),
                         SmallImage = "beat_saber_logo",
-                        SmallText = mode
+                        SmallText = PluginConfig.Instance.SmallImageText.Format(placeholders)
                     },
-                    Timestamps = timestampsLatest,
                     Details = details,
                     State = state,
-                    ApplicationId = 956250915378192454,
+                    ApplicationId = PluginConfig.Instance.TargetDiscordAppID,
                     Type = ActivityType.Playing
-                }, (a) => { if (a == Result.Ok) Plugin.Log.Notice($"Updated DRP: SongStart --- {details}"); });
+                };
+
+                if (PluginConfig.Instance.TimestampMode == TimestampMode.ChangeOnMap) act.Timestamps = timestampsLatest;
+                else if (PluginConfig.Instance.TimestampMode == TimestampMode.Static) act.Timestamps = new ActivityTimestamps { Start = Plugin.launched, End = 0L };
+
+                Plugin.DiscordO.GetActivityManager().UpdateActivity(act, (a) => { if (a == Result.Ok) Plugin.Log.Notice($"Updated DRP: SongStart --- {details}"); });
             }
         }
         internal static void PauseDRP() {
